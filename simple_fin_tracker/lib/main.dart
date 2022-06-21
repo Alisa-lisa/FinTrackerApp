@@ -39,55 +39,109 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+enum TransactionDirection { incoming, outgoing }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class _MyHomePageState extends State<MyHomePage> {
+	// controllers -> text input
+	final _amountController = TextEditingController();  // raw amount
+	final _tagsController = TextEditingController();  // transaction function for now strings devided by ;
+	final _commentController = TextEditingController();  // transaction coment
+	final _accountController = TextEditingController();  // origin of transaction: cash, account1, etc.
+
+	// variables to update
+	String? _amount = null;
+	String? _tags = null;
+	String? _comment = null;
+	String? _account = null;
+	bool _cost = true;
+
+	Future<void> _showTextInputDialog(BuildContext context) async {
+		double screenWidth = MediaQuery.of(context).size.width;
+		double screenHeight = MediaQuery.of(context).size.height;
+		double dialogWidth = screenWidth * 0.9;
+		double dialogHeight = screenHeight * 0.8;
+		return showDialog(context: context, builder: (context) {
+			return Dialog(
+				child: Container(
+				width: dialogWidth, 
+				height: dialogHeight,
+				child: Column(
+					children: <Widget>[
+						Expanded(child:Padding(
+							padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+							child:TextFormField(
+								decoration: const InputDecoration(
+									border: UnderlineInputBorder(),
+									labelText: 'Transaction amount'),
+								controller: _amountController,
+						))),
+						Expanded(child:Padding(
+							padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+							child:TextFormField(
+							decoration: const InputDecoration(
+							border: UnderlineInputBorder(),
+							labelText: 'Tags'),
+							controller: _tagsController,
+						))),
+						Expanded(child:Padding(
+							padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+							child:TextFormField(
+							decoration: const InputDecoration(
+							border: UnderlineInputBorder(),
+							labelText: 'Comments'),
+							controller: _commentController,
+						))),
+						Expanded(child:Padding(
+							padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+							child:TextFormField(
+							decoration: const InputDecoration(
+							border: UnderlineInputBorder(),
+							labelText: 'Account'),
+							controller: _accountController,
+						))),
+						Expanded(child:Padding(
+							padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+							child: Row(children: <Widget>[
+								Expanded(child:Padding(
+									padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+									child:ListTile(
+										title: const Text('Outgoing'),
+										leading: Radio<bool>(
+										value: true,
+										groupValue: _cost,
+										onChanged: (bool? value) {
+											setState(() {_cost = value!;});
+										})
+									))),
+								Expanded(child:Padding(
+									padding: EdgeInsets.fromLTRB(dialogWidth * 0.05, 0, dialogWidth * 0.05, 0),
+									child:ListTile(
+										title: const Text('Incoming'),
+										leading: Radio<bool>(
+										value: false,
+										groupValue: _cost,
+										onChanged: (bool? value) {
+											setState(() {_cost = value!;});
+										})
+								)))
+							]))),
+						Padding(
+							padding: EdgeInsets.fromLTRB(0, 25, 0, 15),
+							child: FloatingActionButton(
+								onPressed: () async {
+									// await _showTextInputDialog(context);
+								},
+							child: const Text("Save"),
+						))
+				])
+			  ));
+			});
+		}
 
   @override
   Widget build(BuildContext context) {
+	if (_amount == null) { _amount = "0.0";}
 	// building an input dialog
-	final AlertDialog dialog = AlertDialog(
-      title: Text('Title'),
-      contentPadding: EdgeInsets.zero,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (int i = 1; i <= 3; i++)
-            ListTile(
-              title: Text(
-                'option $i',
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1
-                    // .copyWith(color: Colors.white),
-              ),
-              leading: Radio(
-                value: i,
-                groupValue: 1,
-                onChanged: (_) {},
-              ),
-            ),
-        ],
-      ),
-      actions: [
-        FlatButton(
-          textColor: Colors.white,
-          onPressed: () => {},
-          child: Text('ACTION 1'),
-        ),
-        FlatButton(
-          textColor: Colors.white,
-          onPressed: () => {},
-          child: Text('ACTION 2'),
-        ),
-      ],
-    );
-
     return Scaffold(
       appBar: AppBar(
 		centerTitle: true,
@@ -98,10 +152,10 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'TBD: last 5 transactions',
             ),
             Text(
-              '$_counter',
+              _amount!,
               style: Theme.of(context).textTheme.headline4,
             ),
           ],
@@ -112,8 +166,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Container(height: 50.0),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-			showDialog<void>(context: context, builder: (context) => dialog);
+        onPressed: () async {
+			await _showTextInputDialog(context);
 		},
         tooltip: 'Add new transaction',
         child: const Icon(Icons.add),
