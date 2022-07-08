@@ -1,19 +1,31 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:csv/csv.dart';
+import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
+
+import './tracking.dart';
 
 class TrackingDialog extends StatefulWidget {
-	TrackingDialog({Key? key}) : super(key: key);
+	final String path;
+	TrackingDialog({required this.path}) : super();
 
 	@override
-	State<TrackingDialog> createState() => _TrackingState();
+	State<TrackingDialog> createState() => _TrackingState(path: path);
 }
 
 class _TrackingState extends State<TrackingDialog> {
+	final String path;
+	_TrackingState({required this.path}) : super();
 	// controllers -> text input
 	final _amountController = TextEditingController();  // raw amount
 	final _tagsController = TextEditingController();  // transaction function for now strings devided by ;
 	final _commentController = TextEditingController();  // transaction coment
 	final _accountController = TextEditingController();  // origin of transaction: cash, account1, etc.
+
 
 	// variables to update
 	String? _amount = null;
@@ -21,9 +33,32 @@ class _TrackingState extends State<TrackingDialog> {
 	String? _comment = null;
 	String? _account = null;
 	bool _outgoingFlow = true;
+	String csv = ""; 
 
-	void collectData() {
+	generateCsv() {
+		List<List<dynamic>> data = [];
+		List<dynamic> row = [];
+		row.add(_amountController.value.text);
+		row.add(_tagsController.value.text);
+		row.add(_commentController.value.text);
+		row.add(_accountController.value.text);
+		row.add(_outgoingFlow);
 
+		data.add(row);
+		csv = const ListToCsvConverter().convert(data);  // is there a better way to work with a data class directly?
+		print(csv);
+		// writing data into file
+		// final String dir = (await getApplicationSupportDirectory()).path;
+		// print(dir);
+
+
+		// reset controllers after csv write
+		_amountController.clear();
+		_tagsController.clear();
+		_commentController.clear();
+		_accountController.clear();
+		_outgoingFlow = true;
+		csv = "";
 	}
 
 	@override
@@ -91,8 +126,11 @@ class _TrackingState extends State<TrackingDialog> {
 					Padding(
 						padding: EdgeInsets.fromLTRB(0, 25, 0, 15),
 						child: FloatingActionButton(
-							onPressed: () => collectData(),
-						child: const Text("Save"),
+							onPressed: () {
+								generateCsv();
+								Navigator.pop(context);
+							},
+							child: const Text("Save"),
 					))
 				])
 		  ));

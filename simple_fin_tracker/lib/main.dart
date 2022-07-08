@@ -63,9 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
 			showDialogSuper(context: context, 
 				onDismissed: (context) { },
-				builder: (context) {
-					return TrackingDialog();}
-				);
+				builder: (context) {return TrackingDialog(path: "PATH");}
+			);
 			setState((){});
 		},
         tooltip: 'Add new transaction',
