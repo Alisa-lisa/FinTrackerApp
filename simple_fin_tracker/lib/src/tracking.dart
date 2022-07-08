@@ -35,7 +35,7 @@ class _TrackingState extends State<TrackingDialog> {
 	bool _outgoingFlow = true;
 	String csv = ""; 
 
-	generateCsv() {
+	generateCsv() async {
 		List<List<dynamic>> data = [];
 		List<dynamic> row = [];
 		row.add(_amountController.value.text);
@@ -46,10 +46,12 @@ class _TrackingState extends State<TrackingDialog> {
 
 		data.add(row);
 		csv = const ListToCsvConverter().convert(data);  // is there a better way to work with a data class directly?
-		print(csv);
 		// writing data into file
-		// final String dir = (await getApplicationSupportDirectory()).path;
-		// print(dir);
+		String dir = (await getApplicationDocumentsDirectory()).path;
+		String filePath = "$dir/budget.csv";
+		print(filePath);
+		File file = File(filePath);
+		await file.writeAsString(csv);
 
 
 		// reset controllers after csv write
