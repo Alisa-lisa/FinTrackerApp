@@ -1,6 +1,12 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
-import './src/tracking.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:assorted_layout_widgets/assorted_layout_widgets.dart';
+import 'package:path_provider/path_provider.dart';
+
+import './src/tracking.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +38,31 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 	
+	loadCsvFromStorage() async {
+		// FilePickerResult? result = await FilePicker.platform.pickFiles(
+		// 	allowedExtensions: ['csv'],
+		// 	type: FileType.custom,
+		// );
+		// print(result);
+		// String path = "";
+		// if (result != null) { 
+		// 	List<String?> paths = result.paths.toList();
+		// 	print(paths);
+		// 	if (paths.length > 0) {path = paths.first!; }
+		// }
+
+		// print(path);
+		String dir = (await getApplicationDocumentsDirectory()).path;
+		final myDir = Directory("$dir/");
+		String filePath = "$dir/budget.csv";
+		var f = File(filePath).openRead();
+		var lines = await f.transform(utf8.decoder).transform(CsvToListConverter()).toList();
+		print(lines.length);
+		// var _csvFiles = myDir.listSync(recursive: true, followLinks: false);
+		// print(_csvFiles);
+
+	}
+
   @override
   Widget build(BuildContext context) {
 	String _amount = "0.0";
@@ -46,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'TBD: last 5 transactions',
+              "TBD",
             ),
             Text(
               _amount,
@@ -63,7 +94,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
 			showDialogSuper(context: context, 
 				onDismissed: (context) { },
-				builder: (context) {return TrackingDialog(path: "PATH");}
+				builder: (context) {
+					loadCsvFromStorage();
+					return TrackingDialog(path: "PATH");
+				}
 			);
 			setState((){});
 		},
